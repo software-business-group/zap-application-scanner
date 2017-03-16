@@ -4,8 +4,6 @@
   "description": "Zap tests",
   "main": "index.js",
   "scripts": {
-    "scan-before": "node scan.js one",
-    "scan-after": "node scan.js two",
     "compare-results": "node compare.js"
   },
   "author": "Sebastian Krysiak",
