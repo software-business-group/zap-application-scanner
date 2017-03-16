@@ -1,0 +1,19 @@
+{
+  "name": "zap",
+  "version": "1.0.0",
+  "description": "Zap tests",
+  "main": "index.js",
+  "scripts": {
+    "scan-before": "node scan.js one",
+    "scan-after": "node scan.js two",
+    "compare-results": "node compare.js"
+  },
+  "author": "Sebastian Krysiak",
+  "license": "ISC",
+  "dependencies": {
+    "config": "^1.25.1",
+    "jsonfile": "^2.4.0",
+    "progress": "^1.1.8",
+    "zaproxy": "^0.2.0"
+  }
+}

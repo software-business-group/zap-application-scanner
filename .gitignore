@@ -1,0 +1,6 @@
+/vendor
+.idea
+/tmp
+/node_modules
+/results
+npm-debug.log
