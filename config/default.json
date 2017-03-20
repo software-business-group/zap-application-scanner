@@ -1,5 +1,5 @@
 {
-    "inditex-complaint" : {
+    "some-app" : {
         "target_url" : "/web/app.php",
         "protected_url" : "/admin",
         "login_handler" : "/login_check",
