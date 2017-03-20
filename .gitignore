@@ -4,3 +4,5 @@
 /node_modules
 /results
 npm-debug.log
+config/*
+!config/default.json-dist
