@@ -23,7 +23,6 @@ var args = process.argv.slice(2),
 script_based_config += "&loginUrl=" + encodeURIComponent(target_full_url + parameters.login_handler);
 script_based_config += "&formUrl=" + encodeURIComponent(target_full_url + parameters.login_form);
 script_based_config += "&submitValue=" + encodeURIComponent(parameters.submit_value);
-script_based_config += "&protectedPages=" + encodeURIComponent(target_full_url + parameters.protected_url);
 
 run();
 
