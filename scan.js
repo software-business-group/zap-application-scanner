@@ -22,6 +22,7 @@ var args = process.argv.slice(2),
 
 script_based_config += "&loginUrl=" + encodeURIComponent(target_full_url + parameters.login_handler);
 script_based_config += "&formUrl=" + encodeURIComponent(target_full_url + parameters.login_form);
+script_based_config += "&submitValue=" + encodeURIComponent(parameters.submit_value);
 script_based_config += "&protectedPages=" + encodeURIComponent(target_full_url + parameters.protected_url);
 
 run();
@@ -65,7 +66,6 @@ function logScanProgress(scan_id, callback, progress_bar, progress){
 }
 
 function runScan(context_id, user_id, callback){
-
     zaproxy.spider.setOptionMaxDepth(parameters.depth, function(err, resp){
         if(err) console.log(err);
         zaproxy.spider.scanAsUser(target_full_url, context_id, user_id, '', function(err, resp){

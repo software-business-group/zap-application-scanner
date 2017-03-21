@@ -10,7 +10,6 @@ function authenticate(helper, paramsValues, credentials) {
     importClass(org.parosproxy.paros.network.HttpRequestHeader);
     importClass(org.parosproxy.paros.network.HttpHeader);
     importClass(org.apache.commons.httpclient.URI);
-    importClass(org.apache.commons.httpclient.params.HttpClientParams);
     importClass(java.util.regex.Pattern);
 
     var loginUri = new URI(paramsValues.get("loginUrl"), false);
@@ -25,7 +24,7 @@ function authenticate(helper, paramsValues, credentials) {
     var requestBody  = "_username="   + encodeURIComponent(credentials.getParam("username"));
     requestBody += "&_password="  + encodeURIComponent(credentials.getParam("password"));
     requestBody += "&_csrf_token=" + encodeURIComponent(inputValues["_csrf_token"]);
-    requestBody += "&_submit=" + encodeURIComponent('Zaloguj');
+    requestBody += "&_submit=" + encodeURIComponent(paramsValues.get("submitValue"));
 
     // Add any extra post data provided
     var extraPostData = paramsValues.get("extraPostData");
@@ -37,25 +36,6 @@ function authenticate(helper, paramsValues, credentials) {
     post.setRequestHeader(new HttpRequestHeader(HttpRequestHeader.POST, loginUri, HttpHeader.HTTP10));
     post.setRequestBody(requestBody);
     helper.sendAndReceive(post);
-
-    // Get the protected pages
-    var protectedPagesSeparatedByComma = paramsValues.get("protectedPages");
-    var protectedPages = protectedPagesSeparatedByComma.split(",");
-
-    // Enable circular redirect
-    var client = getHttpClientFromHelper(helper);
-    client.getParams().setParameter(HttpClientParams.ALLOW_CIRCULAR_REDIRECTS, true);
-
-    // Perform a GET request on the protected pages to avoid redirects during the scan
-    for (var index in protectedPages) {
-        var request = helper.prepareMessage();
-        request.setRequestHeader(new HttpRequestHeader(HttpRequestHeader.GET, new URI(protectedPages[index], false), HttpHeader.HTTP10));
-        helper.sendAndReceive(request, true);
-    }
-
-    // Disable circular redirect
-    client.getParams().setParameter(HttpClientParams.ALLOW_CIRCULAR_REDIRECTS, false);
-
     return post;
 }
 
@@ -81,7 +61,7 @@ function getHttpClientFromHelper(helper) {
 }
 
 function getRequiredParamsNames(){
-    return ["formUrl", "loginUrl", "protectedPages"];
+    return ["formUrl", "loginUrl", "submitValue"];
 }
 
 function getOptionalParamsNames(){

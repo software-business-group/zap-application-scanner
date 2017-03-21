@@ -60,9 +60,10 @@ npm install
         "proxy_port" : "8080",
         "username" : "test",
         "password" : "test",
+        "submit_value" : "zaloguj",
         "logged_in_indicator" : "Wyloguj",
         "login_script" : "login-script",
-        "ignored_codes" : ["200"],
+        "desired_codes" : ["500"],
         "depth" : 5
     }
 
@@ -74,6 +75,7 @@ npm install
   - `login_form` - gdzie wysyłany jest request po formularz do logowania
   - `proxy_url` , `proxy_port` - ustawienia proxy zapa - powyżej domyślne
   - `username` , `password` - dane do zalogowania się do testowanej aplikacji
+  - `submit_value` - value submit w formularzu logowania
   - `login_script` - skrypt Zapa wykonujący logowanie, takie skrypty umieszczone są w katalogu `/scripts`
-  - `ignored_codes` - jakich zwrotek nie porównujemy w skrypcie compare.js
+  - `desired_codes` - jakie odpowiedzi porównujemy w skrypcie compare.js
   - `depth` - jak głęboko spider ma się zagłębiać w drzewo strony 

@@ -27,7 +27,7 @@ function getDiff(obj1, obj2){
     obj1.forEach(function(elem){
        same = false;
 
-       if(parameters.ignored_codes.indexOf(elem.statusCode) == -1){
+       if(parameters.desired_codes.indexOf(elem.statusCode) !== -1){
 
            var elem_clean_url = cleanUrl(elem.url);
 

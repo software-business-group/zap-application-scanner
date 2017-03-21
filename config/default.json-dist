@@ -8,9 +8,10 @@
         "proxy_port" : "8080",
         "username" : "test",
         "password" : "test",
+        "submit_value" : "Zaloguj",
         "logged_in_indicator" : "Wyloguj",
         "login_script" : "login-script",
-        "ignored_codes" : ["200"],
+        "desired_codes" : ["500"],
         "depth" : 5
     }
 }
