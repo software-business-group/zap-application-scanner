@@ -17,21 +17,16 @@ var args = process.argv.slice(2),
     context_name = Math.random(),
     logged_in_indicator_regex = '\\Q' + parameters.logged_in_indicator + '\\E.*',
     out_file = __dirname + '/tmp/results-' + check_number + '.json',
-    auth_config = 'username=' + encodeURIComponent(parameters.username) + '&password=' + encodeURIComponent(parameters.password),
-    script_based_config = "scriptName=" + encodeURIComponent(parameters.login_script);
-
-script_based_config += "&loginUrl=" + encodeURIComponent(target_full_url + parameters.login_handler);
-script_based_config += "&formUrl=" + encodeURIComponent(target_full_url + parameters.login_form);
-script_based_config += "&submitValue=" + encodeURIComponent(parameters.submit_value);
+    script_based_config = getScriptBasedConfig();
 
 run();
 
 
 function run(){
-    createContext(function(context_id){
-        loadRequiredScripts(function(){
-            setAuthentication(context_id, function(context_id){
-                createUser(context_id, function(context_id, user_id){
+    createContext(function (context_id) {
+        loadRequiredScripts(function () {
+            setAuthentication(context_id, function (context_id) {
+                createUser(context_id, function (context_id, user_id) {
                     runScan(context_id, user_id, saveScanResults);
                 });
             });
@@ -113,7 +108,13 @@ function checkIfContainsScript(scripts, script_name, callback){
     callback(found);
 }
 
-
+function cleanUpSite(callback) {
+    console.log('Cleaning up previous site scan entries in sites tab');
+    zaproxy.core.api.request('/core/action/deleteSiteNode/', {'url' : target_domain}, function(err, resp){
+        if(err) console.log(err);
+        callback()
+    });
+}
 
 function createContext(callback) {
     console.log('Creating new context with name ' + context_name);
@@ -150,17 +151,32 @@ function createUser(context_id, callback) {
         if (err) console.log(err);
         var user_id = resp.userId;
 
-        console.log('Setting user authentication credentials');
-
-        zaproxy.users.setAuthenticationCredentials(context_id, user_id, auth_config, function (err, resp) {
+        console.log('Enabling user');
+        zaproxy.users.setUserEnabled(context_id, user_id, 'True', function (err, resp) {
             if (err) console.log(err);
-
-            console.log('Enabling user');
-
-            zaproxy.users.setUserEnabled(context_id, user_id, 'True', function (err, resp) {
-                if (err) console.log(err);
-                callback(context_id, user_id);
-            });
+            callback(context_id, user_id);
         });
     });
+}
+
+function getScriptBasedConfig(){
+    var login_data = parameters.login_data,
+        login_data_array = [];
+
+    script_based_config  = "scriptName=" + encodeURIComponent(parameters.login_script);
+    script_based_config += "&loginUrl=" + encodeURIComponent(target_full_url + parameters.login_handler);
+    script_based_config += "&formUrl=" + encodeURIComponent(target_full_url + parameters.login_form);
+
+
+    for (var key in login_data) {
+        if (login_data.hasOwnProperty(key)) {
+            login_data_array.push(key + "=" + login_data[key]);
+        }
+    }
+    script_based_config += '&loginData=' + encodeURIComponent(login_data_array.join(','));
+
+    if(parameters.retrieved_form_values.length){
+        script_based_config += "&retrievedFormValues=" + encodeURIComponent(parameters.retrieved_form_values.join(','));
+    }
+    return script_based_config
 }

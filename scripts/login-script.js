@@ -1,5 +1,5 @@
 
-function authenticate(helper, paramsValues, credentials) {
+function authenticate(helper, paramsValues) {
 
     // Enable Rhino behavior, in case ZAP is running on Java 8 (which uses Nashorn)
     if (java.lang.System.getProperty("java.version").startsWith("1.8")) {
@@ -12,37 +12,47 @@ function authenticate(helper, paramsValues, credentials) {
     importClass(org.apache.commons.httpclient.URI);
     importClass(java.util.regex.Pattern);
 
-    var loginUri = new URI(paramsValues.get("loginUrl"), false);
-    var formUri = new URI(paramsValues.get("formUrl"), false);
+    var loginUri = new URI(paramsValues.get("loginUrl"), false),
+        formUri = new URI(paramsValues.get("formUrl"), false),
+        retrievedFormValues = paramsValues.get("retrievedFormValues"),
+        loginData = paramsValues.get("loginData"),
+        get = helper.prepareMessage(),
+        requestBodyArray = [],
+        loginDataArray = [],
+        inputValues, post, responseBody, requestBody;
 
-    var get = helper.prepareMessage();
     get.setRequestHeader(new HttpRequestHeader(HttpRequestHeader.GET, formUri, HttpHeader.HTTP10));
     helper.sendAndReceive(get);
-    var inputValues = getInputValues(get.getResponseBody().toString());
+    responseBody = get.getResponseBody().toString();
 
-    // Build the request body using the credentials values and the CAS values obtained from the first request
-    var requestBody  = "_username="   + encodeURIComponent(credentials.getParam("username"));
-    requestBody += "&_password="  + encodeURIComponent(credentials.getParam("password"));
-    requestBody += "&_csrf_token=" + encodeURIComponent(inputValues["_csrf_token"]);
-    requestBody += "&_submit=" + encodeURIComponent(paramsValues.get("submitValue"));
 
-    // Add any extra post data provided
-    var extraPostData = paramsValues.get("extraPostData");
-    if (extraPostData != null && !extraPostData.trim().isEmpty()) {
-        requestBody += "&" + extraPostData.trim();
+    if(retrievedFormValues.length && !retrievedFormValues.trim().isEmpty()){
+        retrievedFormValues = retrievedFormValues.trim().split(',');
+        inputValues = getResponseInputs(responseBody, retrievedFormValues);
+        for(var i = 0; i < retrievedFormValues.length; i++){
+            requestBodyArray.push(retrievedFormValues[i] + "=" + inputValues[retrievedFormValues[i]])
+        }
+    }
+    if(loginData.length && !loginData.trim().isEmpty()){
+        loginDataArray = loginData.trim().split(',');
+        for(var i = 0; i < retrievedFormValues.length; i++){
+            requestBodyArray.push(loginDataArray[i]);
+        }
     }
 
-    var post = helper.prepareMessage();
+    requestBody = requestBodyArray.join('&');
+
+    post = helper.prepareMessage();
     post.setRequestHeader(new HttpRequestHeader(HttpRequestHeader.POST, loginUri, HttpHeader.HTTP10));
     post.setRequestBody(requestBody);
     helper.sendAndReceive(post);
     return post;
 }
 
-function getInputValues(response){
+function getResponseInputs(response, inputs_array){
     var result = {};
 
-    var regex = "<input.*name=\"(_paswword|_username|_csrf_token)\".*value=\"([^\"]*)\"";
+    var regex = "<input.*name=\"(" + inputs_array.join('|') + ")\"[^>]*\n?value=\"([^\"]*)\"";
     var matcher = Pattern.compile(regex).matcher(response);
     while (matcher.find()) {
         result[matcher.group(1)] = matcher.group(2);
@@ -50,22 +60,12 @@ function getInputValues(response){
     return result;
 }
 
-function getHttpClientFromHelper(helper) {
-    var httpSenderField = helper.getClass().getDeclaredField("httpSender");
-    httpSenderField.setAccessible(true);
-    var httpSender = httpSenderField.get(helper);
-
-    var clientField = httpSender.getClass().getDeclaredField("client");
-    clientField.setAccessible(true);
-    return clientField.get(httpSender);
-}
-
 function getRequiredParamsNames(){
-    return ["formUrl", "loginUrl", "submitValue"];
+    return ["formUrl", "loginUrl", "loginData"];
 }
 
 function getOptionalParamsNames(){
-    return ["extraPostData"];
+    return ["retrievedFormValues"];
 }
 
 function getCredentialsParamsNames(){

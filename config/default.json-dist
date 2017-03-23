@@ -6,9 +6,11 @@
         "login_form" : "/login",
         "proxy_url" : "http://127.0.0.1",
         "proxy_port" : "8080",
-        "username" : "test",
-        "password" : "test",
-        "submit_value" : "Zaloguj",
+        "login_data" : {
+            "username": "yourUsername",
+            "password": "yourPassword"
+        },
+        "retrieved_form_values" : ["_csrf_token", "_submit"],
         "logged_in_indicator" : "Wyloguj",
         "login_script" : "login-script",
         "desired_codes" : ["500"],
